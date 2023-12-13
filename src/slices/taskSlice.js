@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { updateTaskApi } from '../services/taskService';
 
 const initialState = {
   tasks: [],
@@ -19,12 +20,8 @@ const taskSlice = createSlice({
       }
     },
     updateTask: (state, action) => {
-      const { id, title, completed } = action.payload;
-      const taskIndex = state.tasks.findIndex((task) => task.id === id);
-      if (taskIndex !== -1) {
-        state.tasks[taskIndex].title = title;
-        state.tasks[taskIndex].completed = completed;
-      }
+      const { id, title, status } = action.payload;
+      updateTaskApi({title, state:status},id)
     },
   },
 });

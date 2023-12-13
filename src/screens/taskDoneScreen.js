@@ -3,20 +3,33 @@ import { View, Text, Button, FlatList, TouchableOpacity, Modal, TextInput, Style
 import { useDispatch, useSelector } from 'react-redux';
 import { getTasks, createTask, deleteTask } from '../services/taskService';
 import { selectTasks, setTasks } from '../slices/taskSlice';
+import CustomButton from '../components/customButton';
+import AddTaskModal from '../components/modal';
 
 const TaskDoneScreen = ({ navigation }) => {
   const dispatch = useDispatch();
-  const tasks = useSelector(selectTasks);
+  
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState('');
+  const tasks = useSelector(selectTasks);
 
   useEffect(() => {
     fetchTasks();
   }, []);
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      // Fetch data when the screen becomes focused
+      fetchTasks();
+    });
 
+    // Cleanup the subscription when the component is unmounted
+    return () => {
+      unsubscribe();
+    };
+  }, [navigation]);
   const fetchTasks = async () => {
     try {
-      const fetchedTasks = await getTasks();
+      const fetchedTasks = await getTasks(2);
       dispatch(setTasks(fetchedTasks));
     } catch (error) {
       console.error('Error fetching tasks:', error);
@@ -53,47 +66,50 @@ const TaskDoneScreen = ({ navigation }) => {
   };
 
   const renderItem = ({ item }) => (
-    <TouchableOpacity onPress={() => navigation.navigate('TaskDetail', { ...item })}>
+    <TouchableOpacity onPress={() => navigation.navigate('Task Detail', { ...item })}>
       <View style={styles.card}>
         <Text>{item.title}</Text>
         <View style={styles.actions}>
-          <Button title="Edit" onPress={() => navigation.navigate('TaskEdit', { ...item })} />
-          <Button title="Detail" onPress={() => navigation.navigate('TaskDetail', { ...item })} />
-          <Button title="Delete" onPress={() => handleDeleteTask(item.id)} />
+          <CustomButton title="Edit" onPress={() => navigation.navigate('Task Edit', { ...item })} style={styles.edit} />
+          <CustomButton title="Detail" onPress={() => navigation.navigate('Task Detail', { ...item })} style={styles.detail} />
+          <CustomButton title="Delete" onPress={() => handleDeleteTask(item.id)} style={styles.delete} />
         </View>
       </View>
     </TouchableOpacity>
   );
 
   return (
-    <View>
+    <View style={styles.container}>
       <FlatList
         data={tasks}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderItem}
       />
-      <TouchableOpacity style={styles.floatingButton} onPress={toggleModal}>
-        <Text style={styles.floatingButtonText}>+</Text>
-      </TouchableOpacity>
-      <Modal visible={isModalVisible} animationType="slide" transparent={true}>
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text>New Task</Text>
-            <TextInput
-              placeholder="Task Title"
-              value={newTaskTitle}
-              onChangeText={(text) => setNewTaskTitle(text)}
-            />
-            <Button title="Create Task" onPress={handleCreateTask} />
-            <Button title="Cancel" onPress={toggleModal} />
-          </View>
-        </View>
-      </Modal>
+      <AddTaskModal state={2} />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  edit: {
+    backgroundColor: '#FFD00C',
+    color: '#FFFFFF',
+    padding: 8,
+  },
+  detail: {
+    backgroundColor: '#002551',
+    color: '#FFFFFF',
+    padding: 8,
+  },
+  delete: {
+    backgroundColor: '#FA1111',
+    color: '#FFFFFF',
+    padding: 8,
+  },
+  container: {
+    flex: 1,
+    position: 'relative',
+  },
   card: {
     padding: 16,
     margin: 8,
@@ -108,13 +124,13 @@ const styles = StyleSheet.create({
   actions: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 8,
+    marginTop: 10,
   },
   floatingButton: {
     position: 'absolute',
     bottom: 16,
     right: 16,
-    backgroundColor: '#3498db',
+    backgroundColor: '#002551',
     borderRadius: 50,
     width: 50,
     height: 50,

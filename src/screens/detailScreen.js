@@ -1,10 +1,10 @@
 import React from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
+import { View, Text, Button, StyleSheet, ScrollView } from 'react-native';
 import { useDispatch } from 'react-redux';
 import { updateTaskStatus } from '../slices/taskSlice';
 
 const DetailScreen = ({ route, navigation }) => {
-  const { id: taskId, title: taskTitle, status: taskStatus } = route.params;
+  const { id: taskId, title: taskTitle, state: taskStatus } = route.params;
   const dispatch = useDispatch();
 
   const handleUpdateStatus = () => {
@@ -13,13 +13,21 @@ const DetailScreen = ({ route, navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Task Detail</Text>
-      <Text>ID: {taskId}</Text>
-      <Text>Title: {taskTitle}</Text>
-      <Text>Status: {taskStatus}</Text>
-      <Button title="Update Status" onPress={handleUpdateStatus} />
+    <ScrollView style={styles.container}>
+    <View style = {{flexDirection :'row', width :"60%"}}>
+         <Text style = {{fontSize : 20,}}>ID: </Text>
+         <Text style = {{fontSize : 22,fontWeight :'bold'}}>{taskId}</Text>
     </View>
+    <View style = {{flexDirection :'row', width :"60%"}}>
+         <Text style = {{fontSize : 20}}>Title: </Text>
+         <Text style = {{fontSize : 22,fontWeight :'bold'}}>{taskTitle}</Text>
+    </View>
+    <View style = {{flexDirection :'row',width :"60%"}}>
+         <Text style = {{fontSize : 20}}>Status: </Text>
+         <Text style = {{fontSize : 22,fontWeight :'bold'}}> {taskStatus}</Text>
+    </View>
+  
+    </ScrollView>
   );
 };
 
